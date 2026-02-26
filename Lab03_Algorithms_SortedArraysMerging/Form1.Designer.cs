@@ -45,8 +45,8 @@
             Algorithm = new DataGridViewTextBoxColumn();
             time = new DataGridViewTextBoxColumn();
             operations_count = new DataGridViewTextBoxColumn();
-            panel1 = new Panel();
             memory = new DataGridViewTextBoxColumn();
+            panel1 = new Panel();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -97,6 +97,7 @@
             clearBtn.TabIndex = 14;
             clearBtn.Text = "Очистить";
             clearBtn.UseVisualStyleBackColor = true;
+            clearBtn.Click += clearBtn_Click;
             // 
             // label1
             // 
@@ -147,6 +148,7 @@
             genBtn.TabIndex = 9;
             genBtn.Text = "Заполнить массив";
             genBtn.UseVisualStyleBackColor = true;
+            genBtn.Click += genBtn_Click;
             // 
             // arr2LenNuD
             // 
@@ -178,6 +180,7 @@
             mergeBtn.TabIndex = 6;
             mergeBtn.Text = "Слияние";
             mergeBtn.UseVisualStyleBackColor = true;
+            mergeBtn.Click += mergeBtn_Click;
             // 
             // arrSize2label
             // 
@@ -244,6 +247,14 @@
             operations_count.ReadOnly = true;
             operations_count.Width = 125;
             // 
+            // memory
+            // 
+            memory.HeaderText = "Использование памяти";
+            memory.MinimumWidth = 6;
+            memory.Name = "memory";
+            memory.ReadOnly = true;
+            memory.Width = 125;
+            // 
             // panel1
             // 
             panel1.Controls.Add(splitContainer1);
@@ -252,14 +263,6 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(1212, 440);
             panel1.TabIndex = 0;
-            // 
-            // memory
-            // 
-            memory.HeaderText = "Использование памяти";
-            memory.MinimumWidth = 6;
-            memory.Name = "memory";
-            memory.ReadOnly = true;
-            memory.Width = 125;
             // 
             // Form1
             // 
