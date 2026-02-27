@@ -2,86 +2,184 @@ using System;
 
 namespace Service
 {
+    /// <summary>
+    /// Содержит реализацию алгоритмов слияния двух отсортированных массивов
+    /// </summary>
     public static class MergeAlgorithms
     {
-        public static int[] SimpleMerge(int[] arr1, int[] arr2, out long operationCount)
+        /// <summary>
+        /// Выполняет простое слияние двух отсортированных массивов с созданием нового массива
+        /// </summary>
+        /// <param name="firstArray">Первый отсортированный массив</param>
+        /// <param name="secondArray">Второй отсортированный массив</param>
+        /// <param name="operationCount">Количество выполненных элементарных операций (выходной параметр)</param>
+        /// <returns>Новый отсортированный массив, содержащий все элементы из обоих исходных массивов</returns>
+        public static int[] SimpleMerge(int[] firstArray, int[] secondArray, out long operationCount)
         {
+            // Инициализация счетчика операций
             operationCount = 0;
-            int n = arr1.Length, m = arr2.Length;
-            int[] result = new int[n + m];
-            int i = 0, j = 0, k = 0;
 
-            while (i < n && j < m)
+            // Определение длин исходных массивов
+            int firstArrayLength = firstArray.Length;
+            int secondArrayLength = secondArray.Length;
+
+            // Создание результирующего массива, размер которого равен сумме размеров исходных
+            int[] mergedArray = new int[firstArrayLength + secondArrayLength];
+
+            // Индексы для прохода по массивам:
+            // firstArrayIndex - индекс в первом массиве
+            // secondArrayIndex - индекс во втором массиве
+            // mergedArrayIndex - индекс в результирующем массиве
+            int firstArrayIndex = 0;
+            int secondArrayIndex = 0;
+            int mergedArrayIndex = 0;
+
+            // Основной цикл слияния: пока не достигли конца хотя бы одного из массивов
+            while (firstArrayIndex < firstArrayLength && secondArrayIndex < secondArrayLength)
             {
+                // Учитываем операцию сравнения двух элементов
                 operationCount++;
-                if (arr1[i] <= arr2[j])
+
+                // Сравниваем текущие элементы первого и второго массивов
+                if (firstArray[firstArrayIndex] <= secondArray[secondArrayIndex])
                 {
-                    result[k++] = arr1[i++];
+                    // Если элемент первого массива меньше или равен, копируем его в результат
+                    mergedArray[mergedArrayIndex] = firstArray[firstArrayIndex];
+
+                    // Перемещаем указатели вперед
+                    firstArrayIndex++;
+                    mergedArrayIndex++;
+
+                    // Учитываем операции копирования и инкремента (условно как одну операцию)
                     operationCount++;
                 }
                 else
                 {
-                    result[k++] = arr2[j++];
+                    // Иначе копируем элемент из второго массива
+                    mergedArray[mergedArrayIndex] = secondArray[secondArrayIndex];
+
+                    // Перемещаем указатели вперед
+                    secondArrayIndex++;
+                    mergedArrayIndex++;
+
+                    // Учитываем операции копирования и инкремента
                     operationCount++;
                 }
             }
 
-            while (i < n)
+            // Копирование оставшихся элементов из первого массива (если они есть)
+            while (firstArrayIndex < firstArrayLength)
             {
-                result[k++] = arr1[i++];
+                mergedArray[mergedArrayIndex] = firstArray[firstArrayIndex];
+                firstArrayIndex++;
+                mergedArrayIndex++;
+
+                // Учитываем операцию копирования
                 operationCount++;
             }
 
-            while (j < m)
+            // Копирование оставшихся элементов из второго массива (если они есть)
+            while (secondArrayIndex < secondArrayLength)
             {
-                result[k++] = arr2[j++];
+                mergedArray[mergedArrayIndex] = secondArray[secondArrayIndex];
+                secondArrayIndex++;
+                mergedArrayIndex++;
+
+                // Учитываем операцию копирования
                 operationCount++;
             }
 
-            return result;
+            return mergedArray;
         }
 
-        public static int[] InPlaceMerge(int[] arr1, int[] arr2, out long operationCount)
+        /// <summary>
+        /// Выполняет слияние двух отсортированных массивов методом "на месте" (in-place)
+        /// с использованием циклических сдвигов элементов
+        /// </summary>
+        /// <param name="firstArray">Первый отсортированный массив</param>
+        /// <param name="secondArray">Второй отсортированный массив</param>
+        /// <param name="operationCount">Количество выполненных элементарных операций (выходной параметр)</param>
+        /// <returns>Новый отсортированный массив, содержащий все элементы</returns>
+        public static int[] InPlaceMerge(int[] firstArray, int[] secondArray, out long operationCount)
         {
             operationCount = 0;
-            int n = arr1.Length, m = arr2.Length;
-            int[] merged = new int[n + m];
-            Array.Copy(arr1, 0, merged, 0, n);
-            Array.Copy(arr2, 0, merged, n, m);
 
-            int left = 0, mid = n, right = n + m;
-            InPlaceMergeInternal(merged, left, mid, right, ref operationCount);
+            int firstArrayLength = firstArray.Length;
+            int secondArrayLength = secondArray.Length;
 
-            return merged;
+            // Создаем общий массив, содержащий все элементы из обоих исходных массивов
+            int[] mergedArray = new int[firstArrayLength + secondArrayLength];
+
+            // Копируем элементы первого массива в начало общего массива
+            Array.Copy(firstArray, 0, mergedArray, 0, firstArrayLength);
+            // Копируем элементы второго массива в конец общего массива
+            Array.Copy(secondArray, 0, mergedArray, firstArrayLength, secondArrayLength);
+
+            // Учитываем операции копирования
+            operationCount += firstArrayLength + secondArrayLength;
+
+            // Определяем границы для слияния:
+            // leftBound - начало первой половины (левая граница)
+            // middleBound - начало второй половины (середина)
+            // rightBound - конец второй половины (правая граница, не включительно)
+            int leftBound = 0;
+            int middleBound = firstArrayLength;
+            int rightBound = firstArrayLength + secondArrayLength;
+
+            // Вызов внутреннего метода для выполнения слияния "на месте"
+            InPlaceMergeInternal(mergedArray, leftBound, middleBound, rightBound, ref operationCount);
+
+            return mergedArray;
         }
 
-        private static void InPlaceMergeInternal(int[] array, int left, int mid, int right, ref long opCount)
+        /// <summary>
+        /// Внутренний метод для слияния двух отсортированных частей массива "на месте"
+        /// </summary>
+        /// <param name="array">Массив, содержащий две отсортированные части</param>
+        /// <param name="leftBound">Левая граница первой части (включительно)</param>
+        /// <param name="middleBound">Граница между первой и второй частью (начало второй части)</param>
+        /// <param name="rightBound">Правая граница второй части (не включительно)</param>
+        /// <param name="opCount">Счетчик операций (передается по ссылке)</param>
+        private static void InPlaceMergeInternal(int[] array, int leftBound, int middleBound, int rightBound, ref long opCount)
         {
-            int i = left;
-            int j = mid;
+            // Указатель i движется по первой части (от leftBound до middleBound)
+            // Указатель j движется по второй части (от middleBound до rightBound)
+            int i = leftBound;
+            int j = middleBound;
 
-            while (i < j && j < right)
+            // Продолжаем, пока не достигли конца первой части и не вышли за границы второй
+            while (i < j && j < rightBound)
             {
+                // Учитываем операцию сравнения элементов
                 opCount++;
+
+                // Если элемент из первой части больше элемента из второй части,
+                // значит элемент из второй части должен стоять раньше
                 if (array[i] > array[j])
                 {
-                    int temp = array[j];
-                    opCount++;
+                    // Сохраняем значение элемента из второй части
+                    int tempValue = array[j];
+                    opCount++; // Учитываем присваивание
 
+                    // Выполняем циклический сдвиг элементов вправо для освобождения места
+                    // Сдвигаем все элементы с позиции i до j-1 на одну позицию вправо
                     for (int k = j; k > i; k--)
                     {
                         array[k] = array[k - 1];
-                        opCount++;
+                        opCount++; // Учитываем каждое присваивание при сдвиге
                     }
 
-                    array[i] = temp;
-                    opCount++;
+                    // Помещаем сохраненный элемент на освободившееся место
+                    array[i] = tempValue;
+                    opCount++; // Учитываем присваивание
 
+                    // Перемещаем оба указателя вперед
                     i++;
                     j++;
                 }
                 else
                 {
+                    // Если элемент на своем месте, просто двигаем указатель i
                     i++;
                 }
             }
