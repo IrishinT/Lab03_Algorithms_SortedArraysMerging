@@ -1,64 +1,22 @@
-using System.Diagnostics;
 using Service;
+using System;
+using System.Diagnostics;
+using System.Windows.Forms;
+using Validation;
 
 namespace Lab03_Algorithms_SortedArraysMerging
 {
     public partial class Form1 : Form
     {
-        // Поля для хранения массивов
         private int[] _array1;
         private int[] _array2;
 
+        private int[] _simpleMergeResult;
+        private int[] _inPlaceMergeResult;
 
         public Form1()
         {
             InitializeComponent();
-        }
-
-        private void mergeBtn_Click(object sender, EventArgs e)
-        {
-
-            if (_array1 == null || _array2 == null)
-            {
-                MessageBox.Show("Сначала сгенерируйте массивы!",
-                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            try
-            {
-                dataGridView1.Rows.Clear();
-
-                // Замер SimpleMerge
-                var stopwatch = Stopwatch.StartNew();
-                var result1 = MergeAlgorithms.SimpleMerge(_array1, _array2, out long ops1);
-                stopwatch.Stop();
-                long time1 = stopwatch.ElapsedMilliseconds;
-                long memory1 = (_array1.Length + _array2.Length + result1.Length) * sizeof(int);
-
-                // Замер InPlaceMerge
-                stopwatch.Restart();
-                var result2 = MergeAlgorithms.InPlaceMerge(_array1, _array2, out long ops2);
-                stopwatch.Stop();
-                long time2 = stopwatch.ElapsedMilliseconds;
-                long memory2 = (_array1.Length + _array2.Length + result2.Length) * sizeof(int);
-
-                // Добавление результатов в таблицу
-                dataGridView1.Rows.Add("Простое слияние", time1, ops1, memory1);
-                dataGridView1.Rows.Add("Слияние на месте", time2, ops2, memory2);
-
-                // Проверка корректности результатов
-                if (!AreArraysEqual(result1, result2))
-                {
-                    MessageBox.Show("ВНИМАНИЕ: Результаты алгоритмов отличаются!",
-                        "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при слиянии: {ex.Message}",
-                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
         private void genBtn_Click(object sender, EventArgs e)
@@ -70,40 +28,172 @@ namespace Lab03_Algorithms_SortedArraysMerging
                 int min = (int)minValNuD.Value;
                 int max = (int)maxValNuD.Value;
 
-                if (min >= max)
+                // Р’Р°Р»РёРґР°С†РёСЏ
+                if (!ValidationHelper.ValidateInputValues(min, max, out string errorMessage))
                 {
-                    MessageBox.Show("Минимальное значение должно быть меньше максимального!",
-                        "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(errorMessage, "РћС€РёР±РєР°",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                Random rand = new Random();
+                // Р“РµРЅРµСЂР°С†РёСЏ
+                (_array1, _array2) = ArrayGenerator.GenerateSortedArrays(size1, size2, min, max);
 
-                // Генерация первого отсортированного массива
-                _array1 = new int[size1];
-                for (int i = 0; i < size1; i++)
-                {
-                    _array1[i] = rand.Next(min, max + 1);
-                }
-                Array.Sort(_array1);
+                _simpleMergeResult = null;
+                _inPlaceMergeResult = null;
 
-                // Генерация второго отсортированного массива
-                _array2 = new int[size2];
-                for (int i = 0; i < size2; i++)
-                {
-                    _array2[i] = rand.Next(min, max + 1);
-                }
-                Array.Sort(_array2);
+                DisplayArrays();
+                ClearResults();
 
-                MessageBox.Show($"Массивы сгенерированы:\n" +
-                    $"Массив 1: {size1} элементов\n" +
-                    $"Массив 2: {size2} элементов",
-                    "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"РњР°СЃСЃРёРІС‹ СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅС‹:\n" +
+                    $"РњР°СЃСЃРёРІ 1: {size1} СЌР»РµРјРµРЅС‚РѕРІ\n" +
+                    $"РњР°СЃСЃРёРІ 2: {size2} СЌР»РµРјРµРЅС‚РѕРІ",
+                    "РЈСЃРїРµС…", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка генерации: {ex.Message}",
-                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"РћС€РёР±РєР° РіРµРЅРµСЂР°С†РёРё: {ex.Message}",
+                    "РћС€РёР±РєР°", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // РћС‚РѕР±СЂР°Р¶РµРЅРёРµ СЂРµР·СѓР»СЊС‚Р°С‚Р° РїСЂРѕСЃС‚РѕРіРѕ СЃР»РёСЏРЅРёСЏ
+        private void DisplaySimpleMergeResult(int[] result)
+        {
+            simpleMergeList.Items.Clear();
+
+            if (result != null)
+            {
+                for (int i = 0; i < result.Length; i++)
+                {
+                    simpleMergeList.Items.Add($"[{i}] = {result[i]}");
+                }
+
+                if (simpleMergeList.Items.Count > 0)
+                {
+                    simpleMergeList.TopIndex = simpleMergeList.Items.Count - 1;
+                }
+            }
+        }
+
+        // РћС‚РѕР±СЂР°Р¶РµРЅРёРµ СЂРµР·СѓР»СЊС‚Р°С‚Р° СЃР»РёСЏРЅРёСЏ РЅР° РјРµСЃС‚Рµ
+        private void DisplayInPlaceMergeResult(int[] result)
+        {
+            inPlaceMergeList.Items.Clear();
+
+            if (result != null)
+            {
+                for (int i = 0; i < result.Length; i++)
+                {
+                    inPlaceMergeList.Items.Add($"[{i}] = {result[i]}");
+                }
+
+                if (inPlaceMergeList.Items.Count > 0)
+                {
+                    inPlaceMergeList.TopIndex = inPlaceMergeList.Items.Count - 1;
+                }
+            }
+        }
+
+
+        private void DisplayArrays()
+        {
+            // РћС‡РёС‰Р°РµРј ListBox
+            arr1List.Items.Clear();
+            arr2List.Items.Clear();
+
+            if (_array1 != null)
+            {
+                // Р”РѕР±Р°РІР»СЏРµРј СЌР»РµРјРµРЅС‚С‹ РїРµСЂРІРѕРіРѕ РјР°СЃСЃРёРІР°
+
+                for (int i = 0; i < _array1.Length; i++)
+                {
+                    arr1List.Items.Add($"[{i}] = {_array1[i]}");
+                }
+
+                // РџСЂРѕРєСЂСѓС‡РёРІР°РµРј РІРЅРёР· (Рє РїРѕСЃР»РµРґРЅРµРјСѓ СЌР»РµРјРµРЅС‚Сѓ)
+                if (arr1List.Items.Count > 0)
+                {
+                    arr1List.TopIndex = arr1List.Items.Count - 1;
+                }
+
+                // РћР±РЅРѕРІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ
+                arr1InfoLb.Text = $"РњР°СЃСЃРёРІ 1 \n{_array1.Length} СЌР»РµРјРµРЅС‚РѕРІ";
+            }
+
+            if (_array2 != null)
+            {
+                // Р”РѕР±Р°РІР»СЏРµРј СЌР»РµРјРµРЅС‚С‹ РІС‚РѕСЂРѕРіРѕ РјР°СЃСЃРёРІР°
+                for (int i = 0; i < _array2.Length; i++)
+                {
+                    arr2List.Items.Add($"[{i}] = {_array2[i]}");
+                }
+
+                // РџСЂРѕРєСЂСѓС‡РёРІР°РµРј РІРЅРёР·
+                if (arr2List.Items.Count > 0)
+                {
+                    arr2List.TopIndex = arr2List.Items.Count - 1;
+                }
+
+                // РћР±РЅРѕРІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ
+                arr2InfoLb.Text = $"РњР°СЃСЃРёРІ 2 \n{_array2.Length} СЌР»РµРјРµРЅС‚РѕРІ";
+            }
+        }
+
+        // РћС‡РёСЃС‚РєР° СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
+        private void ClearResults()
+        {
+            simpleMergeList.Items.Clear();
+            inPlaceMergeList.Items.Clear();
+        }
+
+        private void mergeBtn_Click(object sender, EventArgs e)
+        {
+            // Р’Р°Р»РёРґР°С†РёСЏ
+            if (!ValidationHelper.ValidateArrays(_array1, _array2, out string errorMessage))
+            {
+                MessageBox.Show(errorMessage, "РћС€РёР±РєР°",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                dataGridView1.Rows.Clear();
+                ClearResults();
+
+                // РџСЂРѕСЃС‚РѕРµ СЃР»РёСЏРЅРёРµ
+                var stopwatch = Stopwatch.StartNew();
+                _simpleMergeResult = MergeAlgorithms.SimpleMerge(_array1, _array2, out long ops1);
+                stopwatch.Stop();
+                long time1 = stopwatch.ElapsedMilliseconds;
+                long memory1 = MemoryCalculator.CalculateSimpleMergeMemory(_array1, _array2, _simpleMergeResult);
+
+                // РЎР»РёСЏРЅРёРµ РЅР° РјРµСЃС‚Рµ
+                stopwatch.Restart();
+                _inPlaceMergeResult = MergeAlgorithms.InPlaceMerge(_array1, _array2, out long ops2);
+                stopwatch.Stop();
+                long time2 = stopwatch.ElapsedMilliseconds;
+                long memory2 = MemoryCalculator.CalculateInPlaceMergeMemory(_array1, _array2, _inPlaceMergeResult);
+
+                // Р’С‹РІРѕРґ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
+                dataGridView1.Rows.Add("РџСЂРѕСЃС‚РѕРµ СЃР»РёСЏРЅРёРµ", time1, ops1, memory1);
+                dataGridView1.Rows.Add("РЎР»РёСЏРЅРёРµ РЅР° РјРµСЃС‚Рµ", time2, ops2, memory2);
+
+                DisplaySimpleMergeResult(_simpleMergeResult);
+                DisplayInPlaceMergeResult(_inPlaceMergeResult);
+
+                // РџСЂРѕРІРµСЂРєР° СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
+                if (!ValidationHelper.ArraysAreEqual(_simpleMergeResult, _inPlaceMergeResult))
+                {
+                    MessageBox.Show("Р РµР·СѓР»СЊС‚Р°С‚С‹ Р°Р»РіРѕСЂРёС‚РјРѕРІ РѕС‚Р»РёС‡Р°СЋС‚СЃСЏ!",
+                        "РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"РћС€РёР±РєР° РїСЂРё СЃР»РёСЏРЅРёРё: {ex.Message}",
+                    "РћС€РёР±РєР°", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -111,28 +201,22 @@ namespace Lab03_Algorithms_SortedArraysMerging
         {
             _array1 = null;
             _array2 = null;
-            dataGridView1.Rows.Clear();
+            _simpleMergeResult = null;
+            _inPlaceMergeResult = null;
+            simpleMergeList.Items.Clear();
+            inPlaceMergeList.Items.Clear();
+
+            arr1List.Items.Clear();
+            arr2List.Items.Clear();
+            simpleMergeList.Items.Clear();
+
+            arr1InfoLb.Text = "РњР°СЃСЃРёРІ РЅРµ СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅ";
+            arr2InfoLb.Text = "РњР°СЃСЃРёРІ РЅРµ СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅ";
 
             arr1LenNuD.Value = 10;
             arr2LenNuD.Value = 10;
             minValNuD.Value = 0;
             maxValNuD.Value = 100;
-
-            MessageBox.Show("Все данные очищены", "Информация",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-
-        private bool AreArraysEqual(int[] arr1, int[] arr2)
-        {
-            if (arr1.Length != arr2.Length) return false;
-
-            for (int i = 0; i < arr1.Length; i++)
-            {
-                if (arr1[i] != arr2[i]) return false;
-            }
-
-            return true;
-        }
-
     }
 }
