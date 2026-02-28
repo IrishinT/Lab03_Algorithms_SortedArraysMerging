@@ -218,5 +218,10 @@ namespace Lab03_Algorithms_SortedArraysMerging
             minValNuD.Value = 0;
             maxValNuD.Value = 100;
         }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
     }
 }
