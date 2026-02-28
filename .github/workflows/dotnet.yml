@@ -1,28 +1,37 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
+name: Build WinForms App
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "main" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "main" ]
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: windows-latest  # WinForms лучше собирать на Windows
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8.0
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: '8.0.x'
+
     - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet restore Lab03_Algorithms_SortedArraysMerging.sln
+
+    - name: Build solution
+      run: dotnet build Lab03_Algorithms_SortedArraysMerging.sln --configuration Release --no-restore
+
+    # Опционально: публикация артефакта для скачивания
+    - name: Publish WinForms App
+      run: dotnet publish Lab03_Algorithms_SortedArraysMerging.sln --configuration Release --output ./publish
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Lab03-App
+        path: ./publish/
+        retention-days: 7
