@@ -41,6 +41,7 @@ namespace Lab03_Algorithms_SortedArraysMerging
             arrSize2label = new Label();
             arrSize1label = new Label();
             groupBox1 = new GroupBox();
+            informationBtn = new Button();
             inPlaceMergeLb = new Label();
             inPlaceMergeList = new ListBox();
             simpleMergeList = new ListBox();
@@ -55,7 +56,6 @@ namespace Lab03_Algorithms_SortedArraysMerging
             operations_count = new DataGridViewTextBoxColumn();
             memory = new DataGridViewTextBoxColumn();
             panel1 = new Panel();
-            informationBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -232,6 +232,18 @@ namespace Lab03_Algorithms_SortedArraysMerging
             groupBox1.TabStop = false;
             groupBox1.Text = "Результаты";
             // 
+            // informationBtn
+            // 
+            informationBtn.Font = new Font("Segoe UI", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 204);
+            informationBtn.Location = new Point(663, 29);
+            informationBtn.Name = "informationBtn";
+            informationBtn.RightToLeft = RightToLeft.No;
+            informationBtn.Size = new Size(101, 32);
+            informationBtn.TabIndex = 15;
+            informationBtn.Text = "Справка";
+            informationBtn.UseVisualStyleBackColor = true;
+            informationBtn.Click += informationBtn_Click;
+            // 
             // inPlaceMergeLb
             // 
             inPlaceMergeLb.AutoSize = true;
@@ -358,17 +370,6 @@ namespace Lab03_Algorithms_SortedArraysMerging
             panel1.Name = "panel1";
             panel1.Size = new Size(1166, 440);
             panel1.TabIndex = 0;
-            // 
-            // informationBtn
-            // 
-            informationBtn.Font = new Font("Segoe UI", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 204);
-            informationBtn.Location = new Point(663, 29);
-            informationBtn.Name = "informationBtn";
-            informationBtn.RightToLeft = RightToLeft.No;
-            informationBtn.Size = new Size(101, 32);
-            informationBtn.TabIndex = 15;
-            informationBtn.Text = "Справка";
-            informationBtn.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 

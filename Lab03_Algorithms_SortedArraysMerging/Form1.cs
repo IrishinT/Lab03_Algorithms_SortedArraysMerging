@@ -223,5 +223,25 @@ namespace Lab03_Algorithms_SortedArraysMerging
         {
 
         }
+
+        private void informationBtn_Click(object sender, EventArgs e)
+        {
+            string helpText =
+                "КАК ПОЛЬЗОВАТЬСЯ ПРОГРАММОЙ\n\n" +
+                "1. Введите размер первого массива\n" +
+                "2. Введите размер второго массива\n" +
+                "3. Укажите минимальное и максимальное значение элементов\n" +
+                "4. Нажмите кнопку «Заполнить массив»\n" +
+                "5. Нажмите кнопку «Слияние» для выполнения алгоритмов\n" +
+                "6. Результаты отобразятся в таблице и списках\n\n" +
+                "Кнопка «Очистить» сбрасывает все данные";
+
+            MessageBox.Show(
+                helpText,
+                "Справка",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
+        }
     }
 }
